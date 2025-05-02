@@ -11,21 +11,21 @@ class Abogado:
             Get all abogado
             """
             return self.app_initializer.getAbogadoControllers().get_abogado()
-        @self.app.route('/v1/abogado/<int:id>',methods=['GET'])
-        def get_abogado_by_id(id):
+        @self.app.route('/v1/abogado/<string:pasaporte>',methods=['GET'])
+        def get_abogado_by_id(pasaporte):
             """
-            Get abogado by id
+            Get abogado by pasaporte
             """
-            return self.app_initializer.getAbogadoControllers().get_abogado_by_id(id)
+            return self.app_initializer.getAbogadoControllers().get_abogado_by_id(pasaporte)
         @self.app.route('/v1/abogado',methods=['POST'])
         def create_abogado():
             """
             Create abogado
             """
             return self.app_initializer.getAbogadoControllers().create_abogado(request.json)
-        @self.app.route('/v1/abogado/<int:id>',methods=['PUT'])
-        def update_abogado(id):
+        @self.app.route('/v1/abogado/<string:pasaporte>',methods=['PUT'])
+        def update_abogado(pasaporte):
             """
             Update abogado by id
             """
-            return self.app_initializer.getAbogadoControllers().update_abogado(id,request.json)
+            return self.app_initializer.getAbogadoControllers().update_abogado(pasaporte,request.json)
