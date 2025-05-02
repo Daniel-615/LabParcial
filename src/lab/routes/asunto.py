@@ -11,21 +11,21 @@ class Asunto:
             Get all asunto
             """
             return self.app_initializer.getAsuntoControllers().get_asunto()
-        @self.app.route('/v1/asunto/<int:id>',methods=['GET'])
-        def get_asunto_by_id(id):
+        @self.app.route('/v1/asunto/<string:expediente>',methods=['GET'])
+        def get_asunto_by_id(expediente):
             """
-            Get asunto by id
+            Get asunto by expediente
             """
-            return self.app_initializer.getAsuntoControllers().get_asunto_by_id(id)
+            return self.app_initializer.getAsuntoControllers().get_asunto_by_id(expediente)
         @self.app.route('/v1/asunto',methods=['POST'])
         def create_asunto():
             """
             Create asunto
             """
             return self.app_initializer.getAsuntoControllers().create_asunto(request.json)
-        @self.app.route('/v1/asunto/<int:id>',methods=['PUT'])
-        def update_asunto(id):
+        @self.app.route('/v1/asunto/<string:expediente>',methods=['PUT'])
+        def update_asunto(expediente):
             """
-            Update asunto by id
+            Update asunto by expediente
             """
-            return self.app_initializer.getAsuntoControllers().update_asunto(id,request.json)
+            return self.app_initializer.getAsuntoControllers().update_asunto(expediente,request.json)
