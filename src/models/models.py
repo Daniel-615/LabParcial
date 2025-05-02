@@ -62,6 +62,7 @@ class Models:
             __table_args__ = {'extend_existing': True}
             pasaporte = db.Column(db.String(50), db.ForeignKey('ABOGADO.pasaporte'), primary_key=True)
             gabinete_id = db.Column(db.Integer, db.ForeignKey('GABINETE.id'), primary_key=True)
+            
 
         self.ABOGADO_GABINETE = ABOGADO_GABINETE
 
