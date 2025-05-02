@@ -62,14 +62,14 @@ class Models:
             __table_args__ = {'extend_existing': True}
             pasaporte = db.Column(db.String(50), db.ForeignKey('ABOGADO.pasaporte'), primary_key=True)
             gabinete_id = db.Column(db.Integer, db.ForeignKey('GABINETE.id'), primary_key=True)
-            
+
 
         self.ABOGADO_GABINETE = ABOGADO_GABINETE
 
         class AUDIENCIA(db.Model):
             __tablename__ = 'AUDIENCIA'
             __table_args__ = {'extend_existing': True}
-            id = db.Column(db.Integer, primary_key=True)
+            id = db.Column(db.Integer, primary_key=True, autoincrement=True)
             asunto_exp = db.Column(db.String(100), db.ForeignKey('ASUNTO.expediente'))
             fecha = db.Column(db.DateTime)
             abogado_pasaporte = db.Column(db.String(50), db.ForeignKey('ABOGADO.pasaporte'))
