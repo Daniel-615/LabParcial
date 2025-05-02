@@ -23,3 +23,9 @@ class AbogadoGabinete:
             Create abogado_gabinete
             """
             return self.app_initializer.getAbogadoGabineteControllers().create_abogado_gabinete(request.json)
+        @self.app.route('/v1/abogado/gabinete/<int:id>',methods=['PUT'])
+        def update_abogado_gabinete(id):
+            """
+            Update abogado_gabinete
+            """
+            return self.app_initializer.getAbogadoGabineteControllers().update_abogado_gabinete(id,request.json)
