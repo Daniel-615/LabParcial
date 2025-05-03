@@ -10,7 +10,7 @@ class LogAsunto:
             page = request.args.get('page', default=1, type=int)
             per_page = request.args.get('per_page', default=10, type=int)
 
-            logs = self.models.LOG_ASUNTO.query.order_by(self.models.LOG_ASUNTO.nombre).paginate(
+            logs = self.models.LOG_ASUNTO.query.order_by(self.models.LOG_ASUNTO.expediente).paginate(
                 page=page, per_page=per_page, error_out=False)
 
             if not logs.items:
