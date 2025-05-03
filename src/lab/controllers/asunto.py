@@ -1,4 +1,5 @@
 from flask import request, jsonify
+from datetime import datetime
 
 class Asunto:
     ESTADOS_VALIDOS = {
@@ -58,8 +59,8 @@ class Asunto:
                 return jsonify({'Error': "'expediente' y 'cliente_id' son requeridos"}), 400
 
             if estado:
-                estado = estado.lower()
-                if estado not in self.ESTADOS_VALIDOS:
+                estado = estado.casefold()
+                if estado not in {e.casefold() for e in self.ESTADOS_VALIDOS}:
                     return jsonify({
                         'Error': f"Estado inválido. Estados permitidos: {', '.join(sorted(self.ESTADOS_VALIDOS))}"
                     }), 400
@@ -91,17 +92,21 @@ class Asunto:
 
             estado = json_asunto.get('estado')
             if estado:
-                estado = estado.lower()
-                if estado not in self.ESTADOS_VALIDOS:
+                estado = estado.casefold()
+                if estado not in {e.casefold() for e in self.ESTADOS_VALIDOS}:
                     return jsonify({
                         'Error': f"Estado inválido. Estados permitidos: {', '.join(sorted(self.ESTADOS_VALIDOS))}"
                     }), 400
                 asunto.estado = estado
 
-            asunto.fecha_fin = json_asunto.get('fecha_fin')
+            fecha_fin = json_asunto.get('fecha_fin')
+            if fecha_fin:
+                try:
+                    asunto.fecha_fin = datetime.fromisoformat(fecha_fin)
+                except ValueError:
+                    return jsonify({'Error': 'Formato de fecha inválido. Use ISO 8601 (YYYY-MM-DD)'}), 400
 
             self.db.session.commit()
-
             return jsonify({'asunto': asunto.to_dict()}), 200
 
         except Exception as e:

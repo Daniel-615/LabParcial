@@ -10,16 +10,16 @@ class Abogado:
             page = request.args.get('page', default=1, type=int)
             per_page = request.args.get('per_page', default=10, type=int)
 
-            all_abogado = self.models.ABOGADO.query.paginate(page=page, per_page=per_page, error_out=False)
+            abogados = self.models.ABOGADO.query.paginate(page=page, per_page=per_page, error_out=False)
 
-            if not all_abogado.items:
+            if not abogados.items:
                 return jsonify({'message': 'No hay abogados registrados'}), 404
 
             return jsonify({
-                "abogados": [abogado.to_dict() for abogado in all_abogado.items],
-                "total": all_abogado.total,
-                "pagina_actual": all_abogado.page,
-                "total_paginas": all_abogado.pages,
+                "abogados": [a.to_dict() for a in abogados.items],
+                "total": abogados.total,
+                "pagina_actual": abogados.page,
+                "total_paginas": abogados.pages,
             }), 200
 
         except Exception as e:
@@ -44,19 +44,22 @@ class Abogado:
             nombre = json_abogado.get('nombre')
 
             if not pasaporte or not nombre:
-                return jsonify({'message': 'Faltan datos obligatorios'}), 400
+                return jsonify({'message': "'pasaporte' y 'nombre' son obligatorios"}), 400
 
             if self.models.ABOGADO.query.filter_by(pasaporte=pasaporte).first():
                 return jsonify({'message': 'Ya existe un abogado con ese pasaporte'}), 409
 
-            abogado = self.models.ABOGADO(
+            nuevo_abogado = self.models.ABOGADO(
                 pasaporte=pasaporte,
                 nombre=nombre
             )
-            self.db.session.add(abogado)
+            self.db.session.add(nuevo_abogado)
             self.db.session.commit()
 
-            return jsonify({"message": "Abogado creado correctamente"}), 201
+            return jsonify({
+                "message": "Abogado creado correctamente",
+                "abogado": nuevo_abogado.to_dict()
+            }), 201
 
         except Exception as e:
             print("Error en create_abogado:", e)
@@ -71,10 +74,13 @@ class Abogado:
             nuevo_nombre = json_abogado.get('nombre')
             if nuevo_nombre:
                 abogado.nombre = nuevo_nombre
+                self.db.session.commit()
+                return jsonify({
+                    "message": "Abogado actualizado correctamente",
+                    "abogado": abogado.to_dict()
+                }), 200
 
-            self.db.session.commit()
-
-            return jsonify({"message": "Abogado actualizado correctamente"}), 200
+            return jsonify({'message': 'No se realizaron cambios'}), 400
 
         except Exception as e:
             print("Error en update_abogado:", e)

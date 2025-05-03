@@ -63,6 +63,11 @@ class Models:
             pasaporte = db.Column(db.String(50), db.ForeignKey('ABOGADO.pasaporte'), primary_key=True)
             gabinete_id = db.Column(db.Integer, db.ForeignKey('GABINETE.id'), primary_key=True)
 
+            def to_dict(self):
+                return {
+                    'pasaporte': self.pasaporte,
+                    'gabinete_id': self.gabinete_id
+                }
 
         self.ABOGADO_GABINETE = ABOGADO_GABINETE
 
