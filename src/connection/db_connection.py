@@ -20,7 +20,7 @@ class Connection:
         try:
             connection_url = (
                 f"mssql+pyodbc://{self.user_sql_server}:{self.password_sql_server}@"
-                f"MSI\\SQLEXPRESS2022/lab"
+                f"JOSEILLESCAS/lab"
                 f"?driver=ODBC+Driver+17+for+SQL+Server&encrypt=yes&TrustServerCertificate=yes"
             )
             return connection_url

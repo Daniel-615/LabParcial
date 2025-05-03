@@ -10,7 +10,10 @@ class Abogado:
             page = request.args.get('page', default=1, type=int)
             per_page = request.args.get('per_page', default=10, type=int)
 
-            abogados = self.models.ABOGADO.query.paginate(page=page, per_page=per_page, error_out=False)
+            # Agregar order_by para evitar el error
+            abogados = self.models.ABOGADO.query.order_by(self.models.ABOGADO.nombre).paginate(
+                page=page, per_page=per_page, error_out=False
+            )
 
             if not abogados.items:
                 return jsonify({'message': 'No hay abogados registrados'}), 404
