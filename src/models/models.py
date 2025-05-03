@@ -8,7 +8,7 @@ class Models:
         class CLIENTE(db.Model):
             __tablename__ = 'CLIENTE'
             __table_args__ = {'extend_existing': True}
-            id = db.Column(db.Integer, primary_key=True)
+            id = db.Column(db.Integer, primary_key=True, autoincrement=True)
             nombre = db.Column(db.String(255), nullable=False)
             direccion = db.Column(db.String(255))
             telefono = db.Column(db.String(50))
@@ -47,7 +47,7 @@ class Models:
         class GABINETE(db.Model):
             __tablename__ = 'GABINETE'
             __table_args__ = {'extend_existing': True}
-            id = db.Column(db.Integer, primary_key=True)
+            id = db.Column(db.Integer, primary_key=True,autoincrement=True)
             nombre = db.Column(db.String(255), nullable=False)
             pais = db.Column(db.String(100))
             sistema_operativo = db.Column(db.String(100))
@@ -87,7 +87,7 @@ class Models:
         class INCIDENCIA(db.Model):
             __tablename__ = 'INCIDENCIA'
             __table_args__ = {'extend_existing': True}
-            id = db.Column(db.Integer, primary_key=True)
+            id = db.Column(db.Integer, primary_key=True,auto_increment=True)
             audiencia_id = db.Column(db.Integer, db.ForeignKey('AUDIENCIA.id'))
             descripcion = db.Column(db.String(1000))
 
