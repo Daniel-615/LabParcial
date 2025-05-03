@@ -100,7 +100,7 @@ class Audiencia:
                     return jsonify({'message': 'Abogado no encontrado'}), 404
                 audiencia.abogado_pasaporte = abogado.pasaporte
 
-            self.db.session.commit()
+            self.db.session.commit() 
 
             return jsonify({'audiencia': audiencia.to_dict()}), 200
 

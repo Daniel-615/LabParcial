@@ -14,13 +14,14 @@ class Connection:
         self.password_oracle = os.getenv("DB_PASSWORD_ORACLE")
         self.database_oracle = os.getenv("DB_NAME_ORACLE")
         self.port_oracle = os.getenv("DB_PORT_ORACLE")
+        self.DB_HOST_SQL_SERVER = os.getenv("DB_HOST_SQL_SERVER")
         
 
     def connect_sqlserver(self):
         try:
             connection_url = (
                 f"mssql+pyodbc://{self.user_sql_server}:{self.password_sql_server}@"
-                f"JOSEILLESCAS/lab"
+                f"{self.DB_HOST_SQL_SERVER}/{self.database_sql_server}"
                 f"?driver=ODBC+Driver+17+for+SQL+Server&encrypt=yes&TrustServerCertificate=yes"
             )
             return connection_url
