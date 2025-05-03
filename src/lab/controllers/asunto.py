@@ -1,6 +1,6 @@
 from flask import request, jsonify
 from datetime import datetime
-
+import requests
 class Asunto:
     ESTADOS_VALIDOS = {
         "en trámite",
@@ -99,6 +99,15 @@ class Asunto:
             self.db.session.add(nuevo_asunto)
             self.db.session.commit()
 
+            # --- Replicación a Oracle ---
+            try:
+                requests.post('http://localhost:5000/v1/log_asunto', json={
+                    'expediente': expediente,
+                    'accion': 'ASUNTO CREADO'
+                })
+            except Exception as log_err:
+                print(f'No se pudo replicar a Oracle: {log_err}')
+
             return jsonify({
                 'message': 'Asunto creado correctamente',
                 'asunto': nuevo_asunto.to_dict()
@@ -118,6 +127,8 @@ class Asunto:
             if not asunto:
                 return jsonify({'message': 'Asunto no encontrado'}), 404
 
+            cambios = []
+
             estado = json_data.get('estado')
             if estado:
                 estado = estado.casefold()
@@ -126,15 +137,26 @@ class Asunto:
                         'message': f"Estado inválido. Permitidos: {', '.join(sorted(self.ESTADOS_VALIDOS))}"
                     }), 400
                 asunto.estado = estado
+                cambios.append('estado')
 
             fecha_fin = json_data.get('fecha_fin')
             if fecha_fin:
                 try:
                     asunto.fecha_fin = datetime.fromisoformat(fecha_fin)
+                    cambios.append('fecha_fin')
                 except ValueError:
                     return jsonify({'message': 'Fecha inválida. Usa formato ISO 8601 (YYYY-MM-DD)'}), 400
 
             self.db.session.commit()
+
+            # --- Replicación en Oracle ---
+            try:
+                requests.post('http://localhost:5000/v1/log_asunto', json={
+                    'expediente': expediente,
+                    'accion': f'ASUNTO ACTUALIZADO | CAMBIOS: {", ".join(cambios)}'
+                })
+            except Exception as log_err:
+                print(f'No se pudo replicar a Oracle: {log_err}')
 
             return jsonify({
                 'message': 'Asunto actualizado correctamente',

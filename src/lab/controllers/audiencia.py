@@ -1,6 +1,6 @@
 from flask import request, jsonify
 from datetime import datetime
-
+import requests
 class Audiencia:
     def __init__(self, db, models,sede):
         self.db = db
@@ -55,6 +55,7 @@ class Audiencia:
             print("Error en get_audiencia_by_id:", e)
             return jsonify({'message': 'Error interno del servidor'}), 500
 
+
     def create_audiencia(self, json_data, sede='salvador'):
         try:
             AudienciaModel, AsuntoModel, AbogadoModel = self._get_model(sede)
@@ -87,11 +88,21 @@ class Audiencia:
             self.db.session.add(nueva_audiencia)
             self.db.session.commit()
 
+            # --- Replicación vía HTTP a Oracle ---
+            try:
+                requests.post('http://localhost:5000/v1/log_asunto', json={
+                    'expediente': asunto_exp,
+                    'accion': f'AUDIENCIA CREADA {nueva_audiencia.id}'
+                })
+            except Exception as log_err:
+                print(f' No se pudo replicar a Oracle: {log_err}')
+
             return jsonify({'audiencia': nueva_audiencia.to_dict()}), 201
 
         except Exception as e:
             print("Error en create_audiencia:", e)
             return jsonify({'message': 'Error interno del servidor'}), 500
+
 
     def update_audiencia(self, id, json_data, sede='salvador'):
         try:
@@ -101,19 +112,32 @@ class Audiencia:
             if not audiencia:
                 return jsonify({'message': 'Audiencia no encontrada'}), 404
 
+            cambios = []
+
             if 'fecha' in json_data:
                 fecha = self._validar_fecha(json_data['fecha'])
                 if not fecha:
                     return jsonify({'message': 'Formato de fecha inválido. Usa ISO 8601'}), 400
                 audiencia.fecha = fecha
+                cambios.append('fecha')
 
             if 'abogado_pasaporte' in json_data:
                 abogado = AbogadoModel.query.filter_by(pasaporte=json_data['abogado_pasaporte']).first()
                 if not abogado:
                     return jsonify({'message': 'Abogado no encontrado'}), 404
                 audiencia.abogado_pasaporte = abogado.pasaporte
+                cambios.append('abogado')
 
             self.db.session.commit()
+
+            # --- Replicación: Log en Oracle ---
+            try:
+                requests.post('http://localhost:5000/v1/log_asunto', json={
+                    'expediente': audiencia.asunto_exp,
+                    'accion': f'AUDIENCIA ACTUALIZADA {id} | CAMBIOS: {", ".join(cambios)}'
+                })
+            except Exception as log_err:
+                print(f'No se pudo replicar a Oracle: {log_err}')
 
             return jsonify({'audiencia': audiencia.to_dict()}), 200
 
