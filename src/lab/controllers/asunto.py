@@ -20,8 +20,9 @@ class Asunto:
         try:
             page = request.args.get('page', default=1, type=int)
             page_size = request.args.get('page_size', default=10, type=int)
-
-            all_asuntos = self.models.ASUNTO.query.paginate(page=page, per_page=page_size, error_out=False)
+            all_asuntos=self.models.ASUNTO.query.order_by(self.models.ASUNTO.fecha_inicio).paginate(
+                page=page, per_page=page_size, error_out=False
+            )
 
             if not all_asuntos.items:
                 return jsonify({'Error': 'No hay asuntos disponibles'}), 404

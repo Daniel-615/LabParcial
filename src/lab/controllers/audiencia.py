@@ -10,8 +10,9 @@ class Audiencia:
         try:
             page = request.args.get('page', default=1, type=int)
             per_page = request.args.get('per_page', default=10, type=int)
-
-            audiencias = self.models.AUDIENCIA.query.paginate(page=page, per_page=per_page, error_out=False)
+            audiencias= self.models.AUDIENCIA.query.order_by(self.models.AUDIENCIA.fecha).paginate(
+                page=page, per_page=per_page, error_out=False
+            )
 
             if not audiencias.items:
                 return jsonify({'message': 'No hay audiencias registradas'}), 404

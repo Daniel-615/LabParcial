@@ -9,9 +9,9 @@ class AbogadoGabinete:
         try:
             page = request.args.get('page', default=1, type=int)
             per_page = request.args.get('per_page', default=10, type=int)
-
-            asociaciones = self.models.ABOGADO_GABINETE.query.paginate(page=page, per_page=per_page, error_out=False)
-
+            asociaciones = self.models.ABOGADO_GABINETE.query.order_by(self.models.ABOGADO_GABINETE.pasaporte).paginate(
+                page=page, per_page=per_page, error_out=False
+            )
             if not asociaciones.items:
                 return jsonify({'message': 'No hay abogados asociados a ningún gabinete'}), 404
 
