@@ -1,17 +1,18 @@
 from flask import request, jsonify
 
 class Abogado:
-    def __init__(self, db, models):
+    def __init__(self, db, models, sede):
         self.db = db
         self.models = models
+        self.sede = sede  # 'salvador' o 'mexico'
 
     def get_abogado(self):
         try:
             page = request.args.get('page', default=1, type=int)
             per_page = request.args.get('per_page', default=10, type=int)
 
-            # Agregar order_by para evitar el error
-            abogados = self.models.ABOGADO.query.order_by(self.models.ABOGADO.nombre).paginate(
+            query = self.db.session.query(self.models.ABOGADO[self.sede])
+            abogados = query.order_by(self.models.ABOGADO[self.sede].nombre).paginate(
                 page=page, per_page=per_page, error_out=False
             )
 
@@ -31,7 +32,7 @@ class Abogado:
 
     def get_abogado_by_id(self, pasaporte):
         try:
-            abogado = self.models.ABOGADO.query.filter_by(pasaporte=pasaporte).first()
+            abogado = self.db.session.query(self.models.ABOGADO[self.sede]).filter_by(pasaporte=pasaporte).first()
             if not abogado:
                 return jsonify({'message': 'Abogado no encontrado'}), 404
 
@@ -49,10 +50,10 @@ class Abogado:
             if not pasaporte or not nombre:
                 return jsonify({'message': "'pasaporte' y 'nombre' son obligatorios"}), 400
 
-            if self.models.ABOGADO.query.filter_by(pasaporte=pasaporte).first():
+            if self.db.session.query(self.models.ABOGADO[self.sede]).filter_by(pasaporte=pasaporte).first():
                 return jsonify({'message': 'Ya existe un abogado con ese pasaporte'}), 409
 
-            nuevo_abogado = self.models.ABOGADO(
+            nuevo_abogado = self.models.ABOGADO[self.sede](
                 pasaporte=pasaporte,
                 nombre=nombre
             )
@@ -70,7 +71,7 @@ class Abogado:
 
     def update_abogado(self, pasaporte, json_abogado):
         try:
-            abogado = self.models.ABOGADO.query.filter_by(pasaporte=pasaporte).first()
+            abogado = self.db.session.query(self.models.ABOGADO[self.sede]).filter_by(pasaporte=pasaporte).first()
             if not abogado:
                 return jsonify({'message': 'Abogado no encontrado'}), 404
 
