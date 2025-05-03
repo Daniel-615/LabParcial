@@ -1,31 +1,39 @@
 from flask import request
+
 class Audiencia:
-    def __init__(self,app,app_initializer):
-        self.app=app
-        self.app_initializer=app_initializer
+    def __init__(self, app, app_initializer, sede):
+        self.app = app
+        self.app_initializer = app_initializer
+        self.sede = sede
         self.routes()
+
     def routes(self):
-        @self.app.route('/v1/audiencia',methods=['GET'])
+        base_path = f'/v1/{self.sede}/audiencia'
+
+        @self.app.route(f'{base_path}', methods=['GET'], endpoint=f'get_audiencia_{self.sede}')
         def get_audiencia():
             """
-            Get all audiencia
+            Obtener todas las audiencias.
             """
-            return self.app_initializer.getAudienciaControllers().get_all_audiencias()
-        @self.app.route('/v1/audiencia/<int:id>',methods=['GET'])
+            return self.app_initializer.getAudienciaController(self.sede).get_all_audiencias()
+
+        @self.app.route(f'{base_path}/<int:id>', methods=['GET'], endpoint=f'get_audiencia_by_id_{self.sede}')
         def get_audiencia_by_id(id):
             """
-            Get audiencia by id
+            Obtener audiencia por ID.
             """
-            return self.app_initializer.getAudienciaControllers().get_audiencia_by_id(id)
-        @self.app.route('/v1/audiencia',methods=['POST'])
+            return self.app_initializer.getAudienciaController(self.sede).get_audiencia_by_id(id)
+
+        @self.app.route(f'{base_path}', methods=['POST'], endpoint=f'create_audiencia_{self.sede}')
         def create_audiencia():
             """
-            Create audiencia
+            Crear una nueva audiencia.
             """
-            return self.app_initializer.getAudienciaControllers().create_audiencia(request.json)
-        @self.app.route('/v1/audiencia/<int:id>',methods=['PUT'])
+            return self.app_initializer.getAudienciaController(self.sede).create_audiencia(request.json)
+
+        @self.app.route(f'{base_path}/<int:id>', methods=['PUT'], endpoint=f'update_audiencia_{self.sede}')
         def update_audiencia(id):
             """
-            Update audiencia by id
+            Actualizar una audiencia existente.
             """
-            return self.app_initializer.getAudienciaControllers().update_audiencia(id,request.json)
+            return self.app_initializer.getAudienciaController(self.sede).update_audiencia(id, request.json)

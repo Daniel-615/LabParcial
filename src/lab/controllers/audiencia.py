@@ -2,15 +2,28 @@ from flask import request, jsonify
 from datetime import datetime
 
 class Audiencia:
-    def __init__(self, db, models):
+    def __init__(self, db, models,sede):
         self.db = db
         self.models = models
+        self.sede=sede
 
-    def get_all_audiencias(self):
+    def _get_model(self, sede):
+        return self.models.AUDIENCIA.get(sede), self.models.ASUNTO.get(sede), self.models.ABOGADO.get(sede)
+
+    def _validar_fecha(self, fecha_str):
         try:
+            return datetime.fromisoformat(fecha_str.replace(" ", "T"))
+        except (ValueError, TypeError):
+            return None
+
+    def get_all_audiencias(self, sede='salvador'):
+        try:
+            AudienciaModel, _, _ = self._get_model(sede)
+
             page = request.args.get('page', default=1, type=int)
             per_page = request.args.get('per_page', default=10, type=int)
-            audiencias= self.models.AUDIENCIA.query.order_by(self.models.AUDIENCIA.fecha).paginate(
+
+            audiencias = AudienciaModel.query.order_by(AudienciaModel.fecha).paginate(
                 page=page, per_page=per_page, error_out=False
             )
 
@@ -28,9 +41,11 @@ class Audiencia:
             print("Error en get_all_audiencias:", e)
             return jsonify({'message': 'Error interno del servidor'}), 500
 
-    def get_audiencia_by_id(self, id):
+    def get_audiencia_by_id(self, id, sede='salvador'):
         try:
-            audiencia = self.models.AUDIENCIA.query.get(id)
+            AudienciaModel, _, _ = self._get_model(sede)
+
+            audiencia = AudienciaModel.query.get(id)
             if not audiencia:
                 return jsonify({'message': 'Audiencia no encontrada'}), 404
 
@@ -40,14 +55,10 @@ class Audiencia:
             print("Error en get_audiencia_by_id:", e)
             return jsonify({'message': 'Error interno del servidor'}), 500
 
-    def _validar_fecha(self, fecha_str):
+    def create_audiencia(self, json_data, sede='salvador'):
         try:
-            return datetime.fromisoformat(fecha_str.replace(" ", "T"))
-        except (ValueError, TypeError):
-            return None
+            AudienciaModel, AsuntoModel, AbogadoModel = self._get_model(sede)
 
-    def create_audiencia(self, json_data):
-        try:
             asunto_exp = json_data.get('asunto_exp')
             fecha_str = json_data.get('fecha')
             abogado_pasaporte = json_data.get('abogado_pasaporte')
@@ -57,17 +68,17 @@ class Audiencia:
 
             fecha = self._validar_fecha(fecha_str)
             if not fecha:
-                return jsonify({'message': 'Formato de fecha inválido. Usa ISO 8601: YYYY-MM-DDTHH:MM:SS o YYYY-MM-DD HH:MM:SS'}), 400
+                return jsonify({'message': 'Formato de fecha inválido. Usa ISO 8601'}), 400
 
-            asunto = self.models.ASUNTO.query.filter_by(expediente=asunto_exp).first()
-            abogado = self.models.ABOGADO.query.filter_by(pasaporte=abogado_pasaporte).first()
+            asunto = AsuntoModel.query.filter_by(expediente=asunto_exp).first()
+            abogado = AbogadoModel.query.filter_by(pasaporte=abogado_pasaporte).first()
 
             if not asunto:
                 return jsonify({'message': 'Asunto no encontrado'}), 404
             if not abogado:
                 return jsonify({'message': 'Abogado no encontrado'}), 404
 
-            nueva_audiencia = self.models.AUDIENCIA(
+            nueva_audiencia = AudienciaModel(
                 asunto_exp=asunto_exp,
                 fecha=fecha,
                 abogado_pasaporte=abogado_pasaporte
@@ -82,25 +93,27 @@ class Audiencia:
             print("Error en create_audiencia:", e)
             return jsonify({'message': 'Error interno del servidor'}), 500
 
-    def update_audiencia(self, id, json_data):
+    def update_audiencia(self, id, json_data, sede='salvador'):
         try:
-            audiencia = self.models.AUDIENCIA.query.get(id)
+            AudienciaModel, _, AbogadoModel = self._get_model(sede)
+
+            audiencia = AudienciaModel.query.get(id)
             if not audiencia:
                 return jsonify({'message': 'Audiencia no encontrada'}), 404
 
             if 'fecha' in json_data:
                 fecha = self._validar_fecha(json_data['fecha'])
                 if not fecha:
-                    return jsonify({'message': 'Formato de fecha inválido. Usa ISO 8601: YYYY-MM-DDTHH:MM:SS o YYYY-MM-DD HH:MM:SS'}), 400
+                    return jsonify({'message': 'Formato de fecha inválido. Usa ISO 8601'}), 400
                 audiencia.fecha = fecha
 
             if 'abogado_pasaporte' in json_data:
-                abogado = self.models.ABOGADO.query.filter_by(pasaporte=json_data['abogado_pasaporte']).first()
+                abogado = AbogadoModel.query.filter_by(pasaporte=json_data['abogado_pasaporte']).first()
                 if not abogado:
                     return jsonify({'message': 'Abogado no encontrado'}), 404
                 audiencia.abogado_pasaporte = abogado.pasaporte
 
-            self.db.session.commit() 
+            self.db.session.commit()
 
             return jsonify({'audiencia': audiencia.to_dict()}), 200
 
