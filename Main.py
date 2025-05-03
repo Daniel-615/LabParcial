@@ -13,7 +13,6 @@ class Main:
 
         try:
             # Obtener URIs para cada sede
-            #uri_guatemala = self.connection.connect_sqlserver_guatemala()
             uri_mexico = self.connection.connect_sqlserver_mexico()
             uri_elsalvador = self.connection.connect_sqlserver_elsalvador()
             uri_oracle = self.connection.connect_oracle()
@@ -33,7 +32,7 @@ class Main:
             }
 
         except Exception as e:
-            print(f"\n❌ Error al establecer conexiones a las bases de datos: {e}\n")
+            print(f"\n Error al establecer conexiones a las bases de datos: {e}\n")
 
         self.app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
