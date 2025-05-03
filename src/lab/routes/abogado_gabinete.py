@@ -12,11 +12,11 @@ class AbogadoGabinete:
             """
             return self.app_initializer.getAbogadoGabineteControllers().get_abogado_gabinete()
         @self.app.route('/v1/abogado/gabinete/<int:id>',methods=['GET'])
-        def get_abogado_gabinete_by_id(pasaporte):
+        def get_abogado_gabinete_by_id(id):
             """
             Get abogado_gabinete by id
             """
-            return self.app_initializer.getAbogadoGabineteControllers().get_abogado_gabinete_by_id(pasaporte)
+            return self.app_initializer.getAbogadoGabineteControllers().get_abogado_gabinete_by_id(id)
         @self.app.route('/v1/abogado/gabinete',methods=['POST'])
         def create_abogado_gabinete():
             """

@@ -10,7 +10,7 @@ class Audiencia:
             """
             Get all audiencia
             """
-            return self.app_initializer.getAudienciaControllers().get_audiencia()
+            return self.app_initializer.getAudienciaControllers().get_all_audiencias()
         @self.app.route('/v1/audiencia/<int:id>',methods=['GET'])
         def get_audiencia_by_id(id):
             """
