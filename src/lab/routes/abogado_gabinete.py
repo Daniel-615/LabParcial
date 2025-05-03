@@ -1,31 +1,39 @@
 from flask import request
+
 class AbogadoGabinete:
-    def __init__(self,app,app_initializer):
-        self.app=app
-        self.app_initializer=app_initializer
+    def __init__(self, app, app_initializer, sede):
+        self.app = app
+        self.app_initializer = app_initializer
+        self.sede = sede
         self.routes()
+
     def routes(self):
-        @self.app.route('/v1/abogado/gabinete',methods=['GET'])
+        base_path = f'/v1/{self.sede}/abogado/gabinete'
+
+        @self.app.route(f'{base_path}', methods=['GET'], endpoint=f'get_abogado_gabinete_{self.sede}')
         def get_abogado_gabinete():
             """
-            Get all abogado_gabinete
+            Obtener todas las asociaciones abogado-gabinete.
             """
-            return self.app_initializer.getAbogadoGabineteControllers().get_abogado_gabinete()
-        @self.app.route('/v1/abogado/gabinete/<int:id>',methods=['GET'])
+            return self.app_initializer.getAbogadoGabineteController(self.sede).get_abogado_gabinete()
+
+        @self.app.route(f'{base_path}/<int:id>', methods=['GET'], endpoint=f'get_abogado_gabinete_by_id_{self.sede}')
         def get_abogado_gabinete_by_id(id):
             """
-            Get abogado_gabinete by id
+            Obtener asociaciones por ID de gabinete.
             """
-            return self.app_initializer.getAbogadoGabineteControllers().get_abogado_gabinete_by_id(id)
-        @self.app.route('/v1/abogado/gabinete',methods=['POST'])
+            return self.app_initializer.getAbogadoGabineteController(self.sede).get_abogado_gabinete_by_id(id)
+
+        @self.app.route(f'{base_path}', methods=['POST'], endpoint=f'create_abogado_gabinete_{self.sede}')
         def create_abogado_gabinete():
             """
-            Create abogado_gabinete
+            Crear una nueva asociación abogado-gabinete.
             """
-            return self.app_initializer.getAbogadoGabineteControllers().create_abogado_gabinete(request.json)
-        @self.app.route('/v1/abogado/gabinete/<int:id>',methods=['PUT'])
+            return self.app_initializer.getAbogadoGabineteController(self.sede).create_abogado_gabinete(request.json)
+
+        @self.app.route(f'{base_path}/<int:id>', methods=['PUT'], endpoint=f'update_abogado_gabinete_{self.sede}')
         def update_abogado_gabinete(id):
             """
-            Update abogado_gabinete
+            Actualizar la asociación abogado-gabinete por ID de gabinete.
             """
-            return self.app_initializer.getAbogadoGabineteControllers().update_abogado_gabinete(id,request.json)
+            return self.app_initializer.getAbogadoGabineteController(self.sede).update_abogado_gabinete(id, request.json)
