@@ -1,17 +1,29 @@
 from flask import jsonify, request
 
 class Cliente:
-    def __init__(self, db, models):
+    def __init__(self, db, models, sede):
         self.db = db
         self.models = models
+        self.sede = sede
+
+    def _get_model(self):
+        return {
+            'salvador': self.models.CLIENTE_SV,
+            'mexico': self.models.CLIENTE_MX
+        }.get(self.sede, None)
 
     def get_clientes(self):
         try:
+            Model = self._get_model()
+            if not Model:
+                return jsonify({'message': 'Sede inválida'}), 400
+
             page = request.args.get('page', default=1, type=int)
             per_page = request.args.get('per_page', default=10, type=int)
 
-            clientes = self.models.CLIENTE.query.order_by(self.models.CLIENTE.nombre).paginate(
-                page=page, per_page=per_page, error_out=False)
+            clientes = Model.query.order_by(Model.nombre).paginate(
+                page=page, per_page=per_page, error_out=False
+            )
 
             if not clientes.items:
                 return jsonify({'message': 'No hay clientes registrados'}), 404
@@ -29,7 +41,11 @@ class Cliente:
 
     def get_cliente_by_id(self, id):
         try:
-            cliente = self.models.CLIENTE.query.filter_by(id=id).first()
+            Model = self._get_model()
+            if not Model:
+                return jsonify({'message': 'Sede inválida'}), 400
+
+            cliente = Model.query.filter_by(id=id).first()
 
             if not cliente:
                 return jsonify({'message': 'Cliente no encontrado'}), 404
@@ -42,6 +58,10 @@ class Cliente:
 
     def create_cliente(self, json_data):
         try:
+            Model = self._get_model()
+            if not Model:
+                return jsonify({'message': 'Sede inválida'}), 400
+
             nombre = json_data.get('nombre')
             direccion = json_data.get('direccion')
             telefono = json_data.get('telefono')
@@ -50,7 +70,7 @@ class Cliente:
             if not nombre or not direccion or not telefono or not email:
                 return jsonify({'message': "'nombre', 'direccion', 'telefono' y 'email' son requeridos"}), 400
 
-            nuevo_cliente = self.models.CLIENTE(
+            nuevo_cliente = Model(
                 nombre=nombre,
                 direccion=direccion,
                 telefono=telefono,
@@ -70,21 +90,22 @@ class Cliente:
 
     def update_cliente(self, id, json_data):
         try:
-            cliente = self.models.CLIENTE.query.filter_by(id=id).first()
+            Model = self._get_model()
+            if not Model:
+                return jsonify({'message': 'Sede inválida'}), 400
 
+            cliente = Model.query.filter_by(id=id).first()
             if not cliente:
                 return jsonify({'message': 'Cliente no encontrado'}), 404
 
-            direccion = json_data.get('direccion')
-            telefono = json_data.get('telefono')
-            email = json_data.get('email')
-
-            if direccion:
-                cliente.direccion = direccion
-            if telefono:
-                cliente.telefono = telefono
-            if email:
-                cliente.email = email
+            if 'nombre' in json_data:
+                cliente.nombre = json_data['nombre']
+            if 'direccion' in json_data:
+                cliente.direccion = json_data['direccion']
+            if 'telefono' in json_data:
+                cliente.telefono = json_data['telefono']
+            if 'email' in json_data:
+                cliente.email = json_data['email']
 
             self.db.session.commit()
 
