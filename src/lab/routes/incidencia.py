@@ -12,25 +12,25 @@ class Incidencia:
             """
             Get all incidencias
             """
-            return self.app_initializer.getincidenciaControllers().get_incidencias()
+            return self.app_initializer.getIncidenciaControllers().get_incidencias()
 
         @self.app.route('/v1/incidencia/<int:id>', methods=['GET'])
         def get_incidencia_by_id(id):
             """
             Get incidencia by ID
             """
-            return self.app_initializer.getincidenciaControllers().get_incidencia_by_id(id)
+            return self.app_initializer.getIncidenciaControllers().get_incidencia_by_id(id)
 
         @self.app.route('/v1/incidencia', methods=['POST'])
         def create_incidencia():
             """
             Create incidencia
             """
-            return self.app_initializer.getincidenciaControllers().create_incidencia(request.json)
+            return self.app_initializer.getIncidenciaControllers().create_incidencia(request.json)
 
         @self.app.route('/v1/incidencia/<int:id>', methods=['PUT'])
         def update_incidencia(id):
             """
             Update incidencia by ID
             """
-            return self.app_initializer.getincidenciaControllers().update_incidencia(id, request.json)
+            return self.app_initializer.getIncidenciaControllers().update_incidencia(id, request.json)
