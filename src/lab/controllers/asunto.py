@@ -12,65 +12,85 @@ class Asunto:
         "cerrado"
     }
 
-    def __init__(self, db, models):
+    def __init__(self, db, models, sede):
         self.db = db
         self.models = models
+        self.sede = sede
+
+    def _get_model(self):
+        try:
+            return self.models.ASUNTO[self.sede], self.models.CLIENTE[self.sede]
+        except KeyError:
+            return None, None
 
     def get_asunto(self):
         try:
+            AsuntoModel, _ = self._get_model()
+            if not AsuntoModel:
+                return jsonify({'message': 'Sede inválida'}), 400
+
             page = request.args.get('page', default=1, type=int)
             page_size = request.args.get('page_size', default=10, type=int)
-            all_asuntos=self.models.ASUNTO.query.order_by(self.models.ASUNTO.fecha_inicio).paginate(
+
+            asuntos = AsuntoModel.query.order_by(AsuntoModel.fecha_inicio).paginate(
                 page=page, per_page=page_size, error_out=False
             )
 
-            if not all_asuntos.items:
-                return jsonify({'Error': 'No hay asuntos disponibles'}), 404
+            if not asuntos.items:
+                return jsonify({'message': 'No hay asuntos disponibles'}), 404
 
             return jsonify({
-                'asuntos': [asunto.to_dict() for asunto in all_asuntos.items],
-                'total': all_asuntos.total,
-                'page': all_asuntos.page,
-                'pages': all_asuntos.pages
+                'asuntos': [a.to_dict() for a in asuntos.items],
+                'total': asuntos.total,
+                'page': asuntos.page,
+                'pages': asuntos.pages
             }), 200
 
         except Exception as e:
             print(f"Error en get_asunto: {e}")
-            return jsonify({'Error': 'Error interno del servidor'}), 500
+            return jsonify({'message': 'Error interno del servidor'}), 500
 
     def get_asunto_by_id(self, expediente):
         try:
-            asunto = self.models.ASUNTO.query.filter_by(expediente=expediente).first()
+            AsuntoModel, _ = self._get_model()
+            if not AsuntoModel:
+                return jsonify({'message': 'Sede inválida'}), 400
+
+            asunto = AsuntoModel.query.filter_by(expediente=expediente).first()
             if not asunto:
-                return jsonify({'Error': 'No se encontró el asunto'}), 404
+                return jsonify({'message': 'Asunto no encontrado'}), 404
 
             return jsonify({'asunto': asunto.to_dict()}), 200
 
         except Exception as e:
             print(f"Error en get_asunto_by_id: {e}")
-            return jsonify({'Error': 'Error interno del servidor'}), 500
+            return jsonify({'message': 'Error interno del servidor'}), 500
 
-    def create_asunto(self, json_asunto):
+    def create_asunto(self, json_data):
         try:
-            expediente = json_asunto.get('expediente')
-            cliente_id = json_asunto.get('cliente_id')
-            estado = json_asunto.get('estado')
+            AsuntoModel, ClienteModel = self._get_model()
+            if not AsuntoModel or not ClienteModel:
+                return jsonify({'message': 'Sede inválida'}), 400
+
+            expediente = json_data.get('expediente')
+            cliente_id = json_data.get('cliente_id')
+            estado = json_data.get('estado')
 
             if not expediente or not cliente_id:
-                return jsonify({'Error': "'expediente' y 'cliente_id' son requeridos"}), 400
+                return jsonify({'message': "'expediente' y 'cliente_id' son obligatorios"}), 400
 
             if estado:
                 estado = estado.casefold()
                 if estado not in {e.casefold() for e in self.ESTADOS_VALIDOS}:
                     return jsonify({
-                        'Error': f"Estado inválido. Estados permitidos: {', '.join(sorted(self.ESTADOS_VALIDOS))}"
+                        'message': f"Estado inválido. Permitidos: {', '.join(sorted(self.ESTADOS_VALIDOS))}"
                     }), 400
 
-            cliente = self.models.CLIENTE.query.filter_by(id=cliente_id).first()
+            cliente = ClienteModel.query.filter_by(id=cliente_id).first()
             if not cliente:
-                return jsonify({'Error': 'No se encontró el cliente'}), 404
+                return jsonify({'message': 'Cliente no encontrado'}), 404
 
-            nuevo_asunto = self.models.ASUNTO(
+            nuevo_asunto = AsuntoModel(
                 expediente=expediente,
                 cliente_id=cliente_id,
                 estado=estado
@@ -79,37 +99,48 @@ class Asunto:
             self.db.session.add(nuevo_asunto)
             self.db.session.commit()
 
-            return jsonify({'asunto': nuevo_asunto.to_dict()}), 201
+            return jsonify({
+                'message': 'Asunto creado correctamente',
+                'asunto': nuevo_asunto.to_dict()
+            }), 201
 
         except Exception as e:
             print(f"Error en create_asunto: {e}")
-            return jsonify({'Error': 'Error interno del servidor'}), 500
+            return jsonify({'message': 'Error interno del servidor'}), 500
 
-    def update_asunto(self, expediente, json_asunto):
+    def update_asunto(self, expediente, json_data):
         try:
-            asunto = self.models.ASUNTO.query.filter_by(expediente=expediente).first()
-            if not asunto:
-                return jsonify({'Error': 'No se encontró el asunto'}), 404
+            AsuntoModel, _ = self._get_model()
+            if not AsuntoModel:
+                return jsonify({'message': 'Sede inválida'}), 400
 
-            estado = json_asunto.get('estado')
+            asunto = AsuntoModel.query.filter_by(expediente=expediente).first()
+            if not asunto:
+                return jsonify({'message': 'Asunto no encontrado'}), 404
+
+            estado = json_data.get('estado')
             if estado:
                 estado = estado.casefold()
                 if estado not in {e.casefold() for e in self.ESTADOS_VALIDOS}:
                     return jsonify({
-                        'Error': f"Estado inválido. Estados permitidos: {', '.join(sorted(self.ESTADOS_VALIDOS))}"
+                        'message': f"Estado inválido. Permitidos: {', '.join(sorted(self.ESTADOS_VALIDOS))}"
                     }), 400
                 asunto.estado = estado
 
-            fecha_fin = json_asunto.get('fecha_fin')
+            fecha_fin = json_data.get('fecha_fin')
             if fecha_fin:
                 try:
                     asunto.fecha_fin = datetime.fromisoformat(fecha_fin)
                 except ValueError:
-                    return jsonify({'Error': 'Formato de fecha inválido. Use ISO 8601 (YYYY-MM-DD)'}), 400
+                    return jsonify({'message': 'Fecha inválida. Usa formato ISO 8601 (YYYY-MM-DD)'}), 400
 
             self.db.session.commit()
-            return jsonify({'asunto': asunto.to_dict()}), 200
+
+            return jsonify({
+                'message': 'Asunto actualizado correctamente',
+                'asunto': asunto.to_dict()
+            }), 200
 
         except Exception as e:
             print(f"Error en update_asunto: {e}")
-            return jsonify({'Error': 'Error interno del servidor'}), 500
+            return jsonify({'message': 'Error interno del servidor'}), 500

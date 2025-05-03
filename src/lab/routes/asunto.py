@@ -1,31 +1,39 @@
 from flask import request
+
 class Asunto:
-    def __init__(self,app,app_initializer):
-        self.app=app
-        self.app_initializer=app_initializer
+    def __init__(self, app, app_initializer, sede):
+        self.app = app
+        self.app_initializer = app_initializer
+        self.sede = sede
         self.routes()
+
     def routes(self):
-        @self.app.route('/v1/asunto',methods=['GET'])
+        base_path = f'/v1/{self.sede}/asunto'
+
+        @self.app.route(f'{base_path}', methods=['GET'], endpoint=f'get_asunto_{self.sede}')
         def get_asunto():
             """
-            Get all asunto
+            Obtener todos los asuntos.
             """
-            return self.app_initializer.getAsuntoControllers().get_asunto()
-        @self.app.route('/v1/asunto/<string:expediente>',methods=['GET'])
+            return self.app_initializer.getAsuntoController(self.sede).get_asunto()
+
+        @self.app.route(f'{base_path}/<string:expediente>', methods=['GET'], endpoint=f'get_asunto_by_id_{self.sede}')
         def get_asunto_by_id(expediente):
             """
-            Get asunto by expediente
+            Obtener asunto por expediente.
             """
-            return self.app_initializer.getAsuntoControllers().get_asunto_by_id(expediente)
-        @self.app.route('/v1/asunto',methods=['POST'])
+            return self.app_initializer.getAsuntoController(self.sede).get_asunto_by_id(expediente)
+
+        @self.app.route(f'{base_path}', methods=['POST'], endpoint=f'create_asunto_{self.sede}')
         def create_asunto():
             """
-            Create asunto
+            Crear nuevo asunto.
             """
-            return self.app_initializer.getAsuntoControllers().create_asunto(request.json)
-        @self.app.route('/v1/asunto/<string:expediente>',methods=['PUT'])
+            return self.app_initializer.getAsuntoController(self.sede).create_asunto(request.json)
+
+        @self.app.route(f'{base_path}/<string:expediente>', methods=['PUT'], endpoint=f'update_asunto_{self.sede}')
         def update_asunto(expediente):
             """
-            Update asunto by expediente
+            Actualizar asunto por expediente.
             """
-            return self.app_initializer.getAsuntoControllers().update_asunto(expediente,request.json)
+            return self.app_initializer.getAsuntoController(self.sede).update_asunto(expediente, request.json)
