@@ -24,64 +24,57 @@ class Config:
         self.db = db
         self.models = models
 
-        self.controllers_oracle(db, models)
-        self.controllers_sql_server(db, models)
+        # Controladores SQL Server por sede
+        self.controllers_sql_server('salvador')
+        self.controllers_sql_server('mexico')
+        self.controllers_oracle()
 
+        # Rutas
+        self.routes_sql_server('salvador')
+        self.routes_sql_server('mexico')
         self.routes_oracle()
-        self.routes_sql_server()
 
-    # Getters
-    def getModels(self):
-        return self.models
+    # SQL SERVER: Getters generales por sede
+    def getClienteController(self, sede): return self.cliente[sede]
+    def getAsuntoController(self, sede): return self.asunto[sede]
+    def getAbogadoController(self, sede): return self.abogado[sede]
+    def getGabineteController(self, sede): return self.gabinete[sede]
+    def getAbogadoGabineteController(self, sede): return self.abogado_gabinete[sede]
+    def getAudienciaController(self, sede): return self.audiencia[sede]
+    def getIncidenciaController(self, sede): return self.incidencia[sede]
 
-    # SQL SERVER: Getters para controladores
-    def getClienteControllers(self):
-        return self.cliente
+    # Oracle: Getter único
+    def getLogAsuntoController(self): return self.log_asunto
 
-    def getAsuntoControllers(self):
-        return self.asunto
+    def controllers_sql_server(self, sede):
+        if not hasattr(self, 'cliente'):
+            self.cliente = {}
+            self.asunto = {}
+            self.abogado = {}
+            self.gabinete = {}
+            self.abogado_gabinete = {}
+            self.audiencia = {}
+            self.incidencia = {}
 
-    def getAbogadoControllers(self):
-        return self.abogado
+        self.cliente[sede] = ClienteController(self.db, self.models, sede)
+        self.asunto[sede] = AsuntoController(self.db, self.models, sede)
+        self.abogado[sede] = AbogadoController(self.db, self.models, sede)
+        self.gabinete[sede] = GabineteController(self.db, self.models, sede)
+        self.abogado_gabinete[sede] = AbogadoGabineteController(self.db, self.models, sede)
+        self.audiencia[sede] = AudienciaController(self.db, self.models, sede)
+        self.incidencia[sede] = IncidenciaController(self.db, self.models, sede)
 
-    def getGabineteControllers(self):
-        return self.gabinete
+    def controllers_oracle(self):
+        self.log_asunto = LogAsuntoController(self.db, self.models)
 
-    def getAbogadoGabineteControllers(self):
-        return self.abogado_gabinete
-
-    def getAudienciaControllers(self):
-        return self.audiencia
-
-    def getIncidenciaControllers(self):
-        return self.incidencia
-
-    # Oracle: Getter
-    def getLogAsuntoControllers(self):
-        return self.log_asunto
-
-    # INSTANCIACIÓN DE CONTROLADORES (lógica de negocio)
-    def controllers_sql_server(self, db, models):
-        self.cliente = ClienteController(db, models)
-        self.asunto = AsuntoController(db, models)
-        self.abogado = AbogadoController(db, models)
-        self.gabinete = GabineteController(db, models)
-        self.abogado_gabinete = AbogadoGabineteController(db, models)
-        self.audiencia = AudienciaController(db, models)
-        self.incidencia = IncidenciaController(db, models)
-
-    def controllers_oracle(self, db, models):
-        self.log_asunto = LogAsuntoController(db, models)
-
-    # REGISTRO DE RUTAS (API)
-    def routes_sql_server(self):
-        self.cliente_route = ClienteRoute(self.app, self)
-        self.asunto_route = AsuntoRoute(self.app, self)
-        self.abogado_route = AbogadoRoute(self.app, self)
-        self.gabinete_route = GabineteRoute(self.app, self)
-        self.abogado_gabinete_route = AbogadoGabineteRoute(self.app, self)
-        self.audiencia_route = AudienciaRoute(self.app, self)
-        self.incidencia_route = IncidenciaRoute(self.app, self)
+    def routes_sql_server(self, sede):
+        ClienteRoute(self.app, self, sede)
+        AsuntoRoute(self.app, self, sede)
+        AbogadoRoute(self.app, self, sede)
+        GabineteRoute(self.app, self, sede)
+        AbogadoGabineteRoute(self.app, self, sede)
+        AudienciaRoute(self.app, self, sede)
+        IncidenciaRoute(self.app, self, sede)
 
     def routes_oracle(self):
-        self.log_asunto_route = LogAsuntoRoute(self.app, self)
+        LogAsuntoRoute(self.app, self)
