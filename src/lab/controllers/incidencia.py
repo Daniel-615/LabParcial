@@ -10,7 +10,8 @@ class Incidencia:
             page = request.args.get('page', default=1, type=int)
             per_page = request.args.get('per_page', default=10, type=int)
 
-            incidencias = self.models.INCIDENCIA.query.paginate(page=page, per_page=per_page, error_out=False)
+            incidencias = self.models.INCIDENCIA.query.order_by(self.models.INCIDENCIA.nombre).paginate(
+                page=page, per_page=per_page, error_out=False)
 
             if not incidencias.items:
                 return jsonify({'message': 'No hay incidencias registradas'}), 404

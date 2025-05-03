@@ -10,7 +10,8 @@ class Cliente:
             page = request.args.get('page', default=1, type=int)
             per_page = request.args.get('per_page', default=10, type=int)
 
-            clientes = self.models.CLIENTE.query.paginate(page=page, per_page=per_page, error_out=False)
+            clientes = self.models.CLIENTE.query.order_by(self.models.CLIENTE.nombre).paginate(
+                page=page, per_page=per_page, error_out=False)
 
             if not clientes.items:
                 return jsonify({'message': 'No hay clientes registrados'}), 404

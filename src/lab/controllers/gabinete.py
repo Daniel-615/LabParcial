@@ -10,7 +10,8 @@ class Gabinete:
             page = request.args.get('page', default=1, type=int)
             per_page = request.args.get('per_page', default=10, type=int)
 
-            gabinetes = self.models.GABINETE.query.paginate(page=page, per_page=per_page, error_out=False)
+            gabinetes = self.models.GABINETE.query.order_by(self.models.GABINETE.nombre).paginate(
+                page=page, per_page=per_page, error_out=False)
 
             if not gabinetes.items:
                 return jsonify({'message': 'No hay gabinetes registrados'}), 404
