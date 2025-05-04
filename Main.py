@@ -5,10 +5,11 @@ from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 from src.lab.OracleHelper import OracleHelper
 from src.config.config import Config
-
+from flasgger import Swagger
 class Main:
     def __init__(self):
         self.app = Flask(__name__)
+        Swagger(self.app) 
         self.connection = Connection()
 
         try:
