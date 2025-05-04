@@ -13,7 +13,13 @@ class Models:
             email = db.Column(db.String(100))
 
             def to_dict(self):
-                return vars(self)
+                return {
+                    'id': self.id,
+                    'nombre': self.nombre,
+                    'direccion': self.direccion,
+                    'telefono': self.telefono,
+                    'email': self.email
+                }
 
         self.CLIENTE_SV = CLIENTE_SV
 
@@ -27,7 +33,13 @@ class Models:
             cliente_id = db.Column(db.Integer, db.ForeignKey('CLIENTE.id'), nullable=False)
 
             def to_dict(self):
-                return vars(self)
+                return{
+                    'expediente': self.expediente,
+                    'fecha_inicio': self.fecha_inicio,
+                    'fecha_fin': self.fecha_fin,
+                    'estado': self.estado,
+                    'cliente_id': self.cliente_id
+                }
 
         self.ASUNTO_SV = ASUNTO_SV
 
@@ -38,7 +50,10 @@ class Models:
             nombre = db.Column(db.String(255), nullable=False)
 
             def to_dict(self):
-                return vars(self)
+                return{
+                    'pasaporte': self.pasaporte,
+                    'nombre': self.nombre
+                }
 
         self.ABOGADO_SV = ABOGADO_SV
 
@@ -51,7 +66,12 @@ class Models:
             sistema_operativo = db.Column(db.String(100))
 
             def to_dict(self):
-                return vars(self)
+                return{
+                    'id': self.id,
+                    'nombre': self.nombre,
+                    'pais': self.pais,
+                    'sistema_operativo': self.sistema_operativo
+                }
 
         self.GABINETE_SV = GABINETE_SV
 
@@ -62,7 +82,10 @@ class Models:
             gabinete_id = db.Column(db.Integer, db.ForeignKey('GABINETE.id'), primary_key=True)
 
             def to_dict(self):
-                return vars(self)
+                return {
+                    'pasaporte': self.pasaporte,
+                    'gabinete_id': self.gabinete_id
+                }
 
         self.ABOGADO_GABINETE_SV = ABOGADO_GABINETE_SV
 
@@ -75,8 +98,12 @@ class Models:
             abogado_pasaporte = db.Column(db.String(50), db.ForeignKey('ABOGADO.pasaporte'), nullable=False)
 
             def to_dict(self):
-                return vars(self)
-
+                return{
+                    'id': self.id,
+                    'asunto_exp': self.asunto_exp,
+                    'fecha': self.fecha,
+                    'abogado_pasaporte': self.abogado_pasaporte
+                }
         self.AUDIENCIA_SV = AUDIENCIA_SV
 
         class INCIDENCIA_SV(db.Model):
@@ -87,7 +114,11 @@ class Models:
             descripcion = db.Column(db.String(1000), nullable=False)
 
             def to_dict(self):
-                return vars(self)
+                return{
+                    'id': self.id,
+                    'audiencia_id': self.audiencia_id,
+                    'descripcion': self.descripcion
+                }
 
         self.INCIDENCIA_SV = INCIDENCIA_SV
 
@@ -102,7 +133,13 @@ class Models:
             email = db.Column(db.String(100))
 
             def to_dict(self):
-                return vars(self)
+                return {
+                    'id': self.id,
+                    'nombre': self.nombre,
+                    'direccion': self.direccion,
+                    'telefono': self.telefono,
+                    'email': self.email
+                }
 
         self.CLIENTE_MX = CLIENTE_MX
 
@@ -116,7 +153,13 @@ class Models:
             cliente_id = db.Column(db.Integer, db.ForeignKey('CLIENTE.id'), nullable=False)
 
             def to_dict(self):
-                return vars(self)
+                return{
+                    'expediente': self.expediente,
+                    'fecha_inicio': self.fecha_inicio,
+                    'fecha_fin': self.fecha_fin,
+                    'estado': self.estado,
+                    'cliente_id': self.cliente_id
+                }
 
         self.ASUNTO_MX = ASUNTO_MX
 
@@ -127,7 +170,10 @@ class Models:
             nombre = db.Column(db.String(255), nullable=False)
 
             def to_dict(self):
-                return vars(self)
+                return{
+                    'pasaporte': self.pasaporte,
+                    'nombre': self.nombre
+                }
 
         self.ABOGADO_MX = ABOGADO_MX
 
@@ -140,7 +186,12 @@ class Models:
             sistema_operativo = db.Column(db.String(100))
 
             def to_dict(self):
-                return vars(self)
+                return{
+                    'id': self.id,
+                    'nombre': self.nombre,
+                    'pais': self.pais,
+                    'sistema_operativo': self.sistema_operativo
+                }
 
         self.GABINETE_MX = GABINETE_MX
 
@@ -151,7 +202,10 @@ class Models:
             gabinete_id = db.Column(db.Integer, db.ForeignKey('GABINETE.id'), primary_key=True)
 
             def to_dict(self):
-                return vars(self)
+                return{
+                    'pasaporte': self.pasaporte,
+                    'gabinete_id': self.gabinete_id
+                }
 
         self.ABOGADO_GABINETE_MX = ABOGADO_GABINETE_MX
 
@@ -164,7 +218,12 @@ class Models:
             abogado_pasaporte = db.Column(db.String(50), db.ForeignKey('ABOGADO.pasaporte'), nullable=False)
 
             def to_dict(self):
-                return vars(self)
+                return {
+                    'id': self.id,
+                    'asunto_exp': self.asunto_exp,
+                    'fecha': self.fecha,
+                    'abogado_pasaporte': self.abogado_pasaporte
+                }
 
         self.AUDIENCIA_MX = AUDIENCIA_MX
 
@@ -176,7 +235,11 @@ class Models:
             descripcion = db.Column(db.String(1000), nullable=False)
 
             def to_dict(self):
-                return vars(self)
+                return{
+                    'id': self.id,
+                    'audiencia_id': self.audiencia_id,
+                    'descripcion': self.descripcion
+                }
 
         self.INCIDENCIA_MX = INCIDENCIA_MX
 
@@ -190,6 +253,47 @@ class Models:
             timestamp = db.Column(db.DateTime, default=db.func.current_timestamp())
 
             def to_dict(self):
-                return vars(self)
+                return{
+                    'id': self.id,
+                    'expediente': self.expediente,
+                    'accion': self.accion,
+                    'timestamp': self.timestamp
+                }
 
         self.LOG_ASUNTO = LOG_ASUNTO
+    # Diccionarios para acceder por sede
+        self.ASUNTO = {
+            'salvador': self.ASUNTO_SV,
+            'mexico': self.ASUNTO_MX
+        }
+
+        self.CLIENTE = {
+            'salvador': self.CLIENTE_SV,
+            'mexico': self.CLIENTE_MX
+        }
+
+        self.ABOGADO = {
+            'salvador': self.ABOGADO_SV,
+            'mexico': self.ABOGADO_MX
+        }
+
+        self.GABINETE = {
+            'salvador': self.GABINETE_SV,
+            'mexico': self.GABINETE_MX
+        }
+
+        self.ABOGADO_GABINETE = {
+            'salvador': self.ABOGADO_GABINETE_SV,
+            'mexico': self.ABOGADO_GABINETE_MX
+        }
+
+        self.AUDIENCIA = {
+            'salvador': self.AUDIENCIA_SV,
+            'mexico': self.AUDIENCIA_MX
+        }
+
+        self.INCIDENCIA = {
+            'salvador': self.INCIDENCIA_SV,
+            'mexico': self.INCIDENCIA_MX
+        }
+
