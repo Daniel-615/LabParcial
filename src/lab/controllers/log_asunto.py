@@ -86,3 +86,41 @@ class LogAsunto:
         except Exception as e:
             print("Error en update_log:", e)
             return jsonify({'message': 'Error interno del servidor'}), 500
+    def innerJoin(self):
+        try:
+            page = request.args.get('page', default=1, type=int)
+            per_page = request.args.get('per_page', default=10, type=int)
+
+            logs = self.models.LOG_ASUNTO.query.order_by(self.models.LOG_ASUNTO.expediente).paginate(
+                page=page, per_page=per_page, error_out=False)
+
+            if not logs.items:
+                return jsonify({'message': 'No hay registros de log'}), 404
+
+            # Recorrer logs y consultar ASUNTO por expediente desde SQL Server
+            enriched_logs = []
+            for log in logs.items:
+                expediente = log.expediente
+
+                # Buscar asunto en Salvador
+                asunto_sv = self.models.ASUNTO_SV.query.filter_by(expediente=expediente).first()
+                # Si no se encuentra, buscar en México
+                asunto_mx = self.models.ASUNTO_MX.query.filter_by(expediente=expediente).first() if not asunto_sv else None
+
+                asunto = asunto_sv or asunto_mx
+
+                enriched_logs.append({
+                    'log': log.to_dict(),
+                    'asunto': asunto.to_dict() if asunto else None
+                })
+
+            return jsonify({
+                'logs': enriched_logs,
+                'total': logs.total,
+                'pagina_actual': logs.page,
+                'total_paginas': logs.pages
+            }), 200
+
+        except Exception as e:
+            print("Error en get_logs:", e)
+            return jsonify({'message': 'Error interno del servidor'}), 500

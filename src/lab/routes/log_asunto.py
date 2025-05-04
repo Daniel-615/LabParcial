@@ -34,3 +34,9 @@ class LogAsunto:
             Update log_asunto by ID
             """
             return self.app_initializer.getLogAsuntoController().update_log(id, request.json)
+        @self.app.route('/v1/inner_join/log_asunto', methods=['GET'])
+        def inner_join():
+            """
+            Inner join between log_asunto and asunto
+            """
+            return self.app_initializer.getLogAsuntoController().inner_join()
