@@ -1,272 +1,138 @@
 class Models:
     def __init__(self, db):
         self.db = db
+        class BaseModel(db.Model):
+            __abstract__ = True  # no se crea tabla de esta clase
 
-        # --- SQL Server - El Salvador ---
-        class CLIENTE_SV(db.Model):
-            __tablename__ = 'CLIENTE'
-            __bind_key__ = 'salvador'
+            def to_dict(self):
+                """Devuelve todos los atributos como diccionario."""
+                return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+        class ClienteBase(BaseModel):
+            __abstract__=True
             id = db.Column(db.Integer, primary_key=True)
             nombre = db.Column(db.String(255), nullable=False)
             direccion = db.Column(db.String(255))
             telefono = db.Column(db.String(50))
             email = db.Column(db.String(100))
-
-            def to_dict(self):
-                return {
-                    'id': self.id,
-                    'nombre': self.nombre,
-                    'direccion': self.direccion,
-                    'telefono': self.telefono,
-                    'email': self.email
-                }
-
-        self.CLIENTE_SV = CLIENTE_SV
-
-        class ASUNTO_SV(db.Model):
-            __tablename__ = 'ASUNTO'
-            __bind_key__ = 'salvador'
+        class AsuntoBase(BaseModel):
+            __abstract__=True
             expediente = db.Column(db.String(100), primary_key=True)
             fecha_inicio = db.Column(db.Date, default=db.func.current_date())
             fecha_fin = db.Column(db.Date)
             estado = db.Column(db.String(50))
             cliente_id = db.Column(db.Integer, db.ForeignKey('CLIENTE.id'), nullable=False)
+        class GabineteBase(BaseModel):
+            __abstract__=True
+            id = db.Column(db.Integer, primary_key=True)
+            nombre = db.Column(db.String(255), nullable=False)
+            pais = db.Column(db.String(100))
+            sistema_operativo = db.Column(db.String(100))
+        class AbogadoBase(BaseModel):
+            __abstract__=True
+            pasaporte = db.Column(db.String(50), primary_key=True)
+            nombre = db.Column(db.String(255), nullable=False)
+        class AbogadoGabineteBase(BaseModel):
+            __abstract__=True
+            pasaporte = db.Column(db.String(50), db.ForeignKey('ABOGADO.pasaporte'), primary_key=True)
+            gabinete_id = db.Column(db.Integer, db.ForeignKey('GABINETE.id'), primary_key=True)
+        class AudienciaBase(BaseModel):
+            __abstract__=True
+            id = db.Column(db.Integer, primary_key=True)
+            asunto_exp = db.Column(db.String(100), db.ForeignKey('ASUNTO.expediente'), nullable=False)
+            fecha = db.Column(db.DateTime, nullable=False)
+            abogado_pasaporte = db.Column(db.String(50), db.ForeignKey('ABOGADO.pasaporte'), nullable=False)
+        class IncidenciaBase(BaseModel):
+            __abstract__=True
+            id = db.Column(db.Integer, primary_key=True)
+            audiencia_id = db.Column(db.Integer, db.ForeignKey('AUDIENCIA.id'), nullable=False)
+            descripcion = db.Column(db.String(1000), nullable=False)
 
-            def to_dict(self):
-                return{
-                    'expediente': self.expediente,
-                    'fecha_inicio': self.fecha_inicio,
-                    'fecha_fin': self.fecha_fin,
-                    'estado': self.estado,
-                    'cliente_id': self.cliente_id
-                }
+        # --- SQL Server - El Salvador ---
+        class CLIENTE_SV(ClienteBase):
+            __tablename__ = 'CLIENTE'
+            __bind_key__ = 'salvador'
+        self.CLIENTE_SV = CLIENTE_SV
+        class ASUNTO_SV(AsuntoBase):
+            __tablename__ = 'ASUNTO'
+            __bind_key__ = 'salvador'
 
         self.ASUNTO_SV = ASUNTO_SV
 
-        class ABOGADO_SV(db.Model):
+        class ABOGADO_SV(AbogadoBase):
             __tablename__ = 'ABOGADO'
             __bind_key__ = 'salvador'
-            pasaporte = db.Column(db.String(50), primary_key=True)
-            nombre = db.Column(db.String(255), nullable=False)
-
-            def to_dict(self):
-                return{
-                    'pasaporte': self.pasaporte,
-                    'nombre': self.nombre
-                }
-
         self.ABOGADO_SV = ABOGADO_SV
 
-        class GABINETE_SV(db.Model):
+        class GABINETE_SV(GabineteBase):
             __tablename__ = 'GABINETE'
             __bind_key__ = 'salvador'
-            id = db.Column(db.Integer, primary_key=True)
-            nombre = db.Column(db.String(255), nullable=False)
-            pais = db.Column(db.String(100))
-            sistema_operativo = db.Column(db.String(100))
-
-            def to_dict(self):
-                return{
-                    'id': self.id,
-                    'nombre': self.nombre,
-                    'pais': self.pais,
-                    'sistema_operativo': self.sistema_operativo
-                }
-
         self.GABINETE_SV = GABINETE_SV
 
-        class ABOGADO_GABINETE_SV(db.Model):
+        class ABOGADO_GABINETE_SV(AbogadoGabineteBase):
             __tablename__ = 'ABOGADO_GABINETE'
             __bind_key__ = 'salvador'
-            pasaporte = db.Column(db.String(50), db.ForeignKey('ABOGADO.pasaporte'), primary_key=True)
-            gabinete_id = db.Column(db.Integer, db.ForeignKey('GABINETE.id'), primary_key=True)
-
-            def to_dict(self):
-                return {
-                    'pasaporte': self.pasaporte,
-                    'gabinete_id': self.gabinete_id
-                }
-
         self.ABOGADO_GABINETE_SV = ABOGADO_GABINETE_SV
 
-        class AUDIENCIA_SV(db.Model):
+        class AUDIENCIA_SV(AudienciaBase):
             __tablename__ = 'AUDIENCIA'
             __bind_key__ = 'salvador'
-            id = db.Column(db.Integer, primary_key=True)
-            asunto_exp = db.Column(db.String(100), db.ForeignKey('ASUNTO.expediente'), nullable=False)
-            fecha = db.Column(db.DateTime, nullable=False)
-            abogado_pasaporte = db.Column(db.String(50), db.ForeignKey('ABOGADO.pasaporte'), nullable=False)
-
-            def to_dict(self):
-                return{
-                    'id': self.id,
-                    'asunto_exp': self.asunto_exp,
-                    'fecha': self.fecha,
-                    'abogado_pasaporte': self.abogado_pasaporte
-                }
         self.AUDIENCIA_SV = AUDIENCIA_SV
 
-        class INCIDENCIA_SV(db.Model):
+        class INCIDENCIA_SV(IncidenciaBase):
             __tablename__ = 'INCIDENCIA'
             __bind_key__ = 'salvador'
-            id = db.Column(db.Integer, primary_key=True)
-            audiencia_id = db.Column(db.Integer, db.ForeignKey('AUDIENCIA.id'), nullable=False)
-            descripcion = db.Column(db.String(1000), nullable=False)
-
-            def to_dict(self):
-                return{
-                    'id': self.id,
-                    'audiencia_id': self.audiencia_id,
-                    'descripcion': self.descripcion
-                }
-
         self.INCIDENCIA_SV = INCIDENCIA_SV
 
         # --- SQL Server - Mexico ---
-        class CLIENTE_MX(db.Model):
+        class CLIENTE_MX(ClienteBase):
             __tablename__ = 'CLIENTE'
             __bind_key__ = 'mexico'
-            id = db.Column(db.Integer, primary_key=True)
-            nombre = db.Column(db.String(255), nullable=False)
-            direccion = db.Column(db.String(255))
-            telefono = db.Column(db.String(50))
-            email = db.Column(db.String(100))
-
-            def to_dict(self):
-                return {
-                    'id': self.id,
-                    'nombre': self.nombre,
-                    'direccion': self.direccion,
-                    'telefono': self.telefono,
-                    'email': self.email
-                }
-
         self.CLIENTE_MX = CLIENTE_MX
 
-        class ASUNTO_MX(db.Model):
+        class ASUNTO_MX(AsuntoBase):
             __tablename__ = 'ASUNTO'
             __bind_key__ = 'mexico'
-            expediente = db.Column(db.String(100), primary_key=True)
-            fecha_inicio = db.Column(db.Date, default=db.func.current_date())
-            fecha_fin = db.Column(db.Date)
-            estado = db.Column(db.String(50))
-            cliente_id = db.Column(db.Integer, db.ForeignKey('CLIENTE.id'), nullable=False)
-
-            def to_dict(self):
-                return{
-                    'expediente': self.expediente,
-                    'fecha_inicio': self.fecha_inicio,
-                    'fecha_fin': self.fecha_fin,
-                    'estado': self.estado,
-                    'cliente_id': self.cliente_id
-                }
-
         self.ASUNTO_MX = ASUNTO_MX
 
-        class ABOGADO_MX(db.Model):
+        class ABOGADO_MX(AbogadoBase):
             __tablename__ = 'ABOGADO'
             __bind_key__ = 'mexico'
-            pasaporte = db.Column(db.String(50), primary_key=True)
-            nombre = db.Column(db.String(255), nullable=False)
-
-            def to_dict(self):
-                return{
-                    'pasaporte': self.pasaporte,
-                    'nombre': self.nombre
-                }
-
         self.ABOGADO_MX = ABOGADO_MX
 
-        class GABINETE_MX(db.Model):
+        class GABINETE_MX(GabineteBase):
             __tablename__ = 'GABINETE'
             __bind_key__ = 'mexico'
-            id = db.Column(db.Integer, primary_key=True)
-            nombre = db.Column(db.String(255), nullable=False)
-            pais = db.Column(db.String(100))
-            sistema_operativo = db.Column(db.String(100))
-
-            def to_dict(self):
-                return{
-                    'id': self.id,
-                    'nombre': self.nombre,
-                    'pais': self.pais,
-                    'sistema_operativo': self.sistema_operativo
-                }
-
         self.GABINETE_MX = GABINETE_MX
 
-        class ABOGADO_GABINETE_MX(db.Model):
+        class ABOGADO_GABINETE_MX(AbogadoGabineteBase):
             __tablename__ = 'ABOGADO_GABINETE'
             __bind_key__ = 'mexico'
-            pasaporte = db.Column(db.String(50), db.ForeignKey('ABOGADO.pasaporte'), primary_key=True)
-            gabinete_id = db.Column(db.Integer, db.ForeignKey('GABINETE.id'), primary_key=True)
-
-            def to_dict(self):
-                return{
-                    'pasaporte': self.pasaporte,
-                    'gabinete_id': self.gabinete_id
-                }
-
         self.ABOGADO_GABINETE_MX = ABOGADO_GABINETE_MX
 
-        class AUDIENCIA_MX(db.Model):
+        class AUDIENCIA_MX(AudienciaBase):
             __tablename__ = 'AUDIENCIA'
             __bind_key__ = 'mexico'
-            id = db.Column(db.Integer, primary_key=True)
-            asunto_exp = db.Column(db.String(100), db.ForeignKey('ASUNTO.expediente'), nullable=False)
-            fecha = db.Column(db.DateTime, nullable=False)
-            abogado_pasaporte = db.Column(db.String(50), db.ForeignKey('ABOGADO.pasaporte'), nullable=False)
-
-            def to_dict(self):
-                return {
-                    'id': self.id,
-                    'asunto_exp': self.asunto_exp,
-                    'fecha': self.fecha,
-                    'abogado_pasaporte': self.abogado_pasaporte
-                }
-
         self.AUDIENCIA_MX = AUDIENCIA_MX
 
-        class INCIDENCIA_MX(db.Model):
+        class INCIDENCIA_MX(IncidenciaBase):
             __tablename__ = 'INCIDENCIA'
             __bind_key__ = 'mexico'
-            id = db.Column(db.Integer, primary_key=True)
-            audiencia_id = db.Column(db.Integer, db.ForeignKey('AUDIENCIA.id'), nullable=False)
-            descripcion = db.Column(db.String(1000), nullable=False)
-
-            def to_dict(self):
-                return{
-                    'id': self.id,
-                    'audiencia_id': self.audiencia_id,
-                    'descripcion': self.descripcion
-                }
-
         self.INCIDENCIA_MX = INCIDENCIA_MX
 
         # --- Oracle - Central ---
-        class LOG_ASUNTO(db.Model):
+        class LOG_ASUNTO(BaseModel):
             __bind_key__ = 'oracle'
             __tablename__ = 'LOG_ASUNTO'
             id = db.Column(db.Integer, primary_key=True)
             expediente = db.Column(db.String(100), nullable=False)
             accion = db.Column(db.String(50), nullable=False)
             timestamp = db.Column(db.DateTime, default=db.func.current_timestamp())
-
-            def to_dict(self):
-                return{
-                    'id': self.id,
-                    'expediente': self.expediente,
-                    'accion': self.accion,
-                    'timestamp': self.timestamp
-                }
-
         self.LOG_ASUNTO = LOG_ASUNTO
     # Diccionarios para acceder por sede
         self.ASUNTO = {
             'salvador': self.ASUNTO_SV,
             'mexico': self.ASUNTO_MX
         }
-
         self.CLIENTE = {
             'salvador': self.CLIENTE_SV,
             'mexico': self.CLIENTE_MX
@@ -296,4 +162,3 @@ class Models:
             'salvador': self.INCIDENCIA_SV,
             'mexico': self.INCIDENCIA_MX
         }
-

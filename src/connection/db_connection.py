@@ -6,12 +6,6 @@ if not load_dotenv(override=True):
 
 class Connection:
     def __init__(self):
-        # Guatemala (principal)
-        self.user_sql_gt = os.getenv("DB_USER_SQL_GT")
-        self.pass_sql_gt = os.getenv("DB_PASSWORD_SQL_GT")
-        self.db_sql_gt = os.getenv("DB_NAME_SQL_GT")
-        self.host_sql_gt = os.getenv("DB_HOST_SQL_GT")
-
         # México
         self.user_sql_mx = os.getenv("DB_USER_SQL_MX")
         self.pass_sql_mx = os.getenv("DB_PASSWORD_SQL_MX")

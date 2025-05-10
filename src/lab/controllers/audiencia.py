@@ -29,13 +29,14 @@ class Audiencia:
 
             if not audiencias.items:
                 return jsonify({'message': 'No hay audiencias registradas'}), 404
-
+            
             return jsonify({
                 'audiencias': [a.to_dict() for a in audiencias.items],
                 'total': audiencias.total,
                 'pagina_actual': audiencias.page,
                 'total_paginas': audiencias.pages
             }), 200
+            
 
         except Exception as e:
             print("Error en get_all_audiencias:", e)
@@ -56,10 +57,9 @@ class Audiencia:
             return jsonify({'message': 'Error interno del servidor'}), 500
 
 
-    def create_audiencia(self, json_data, sede='salvador'):
+    def create_audiencia(self, json_data, sede):
         try:
             AudienciaModel, AsuntoModel, AbogadoModel = self._get_model(sede)
-
             asunto_exp = json_data.get('asunto_exp')
             fecha_str = json_data.get('fecha')
             abogado_pasaporte = json_data.get('abogado_pasaporte')
@@ -96,15 +96,15 @@ class Audiencia:
                 })
             except Exception as log_err:
                 print(f' No se pudo replicar a Oracle: {log_err}')
-
-            return jsonify({'audiencia': nueva_audiencia.to_dict()}), 201
+            
+            return jsonify({'message': 'Audiencia creada correctamente.'}), 201
 
         except Exception as e:
             print("Error en create_audiencia:", e)
             return jsonify({'message': 'Error interno del servidor'}), 500
 
 
-    def update_audiencia(self, id, json_data, sede='salvador'):
+    def update_audiencia(self, id, json_data, sede):
         try:
             AudienciaModel, _, AbogadoModel = self._get_model(sede)
 

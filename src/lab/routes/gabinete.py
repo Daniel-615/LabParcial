@@ -23,7 +23,8 @@ class Gabinete:
               404:
                 description: No se encontraron gabinetes.
             """
-            return self.app_initializer.getGabineteController(self.sede).get_gabinetes()
+            controller = self.app_initializer.getGabineteController(self.sede)
+            return controller.get_gabinetes(self.sede)
 
         @self.app.route(f'{base_path}/<int:id>', methods=['GET'], endpoint=f'get_gabinete_by_id_{self.sede}')
         def get_gabinete_by_id(id):
@@ -44,7 +45,8 @@ class Gabinete:
               404:
                 description: Gabinete no encontrado.
             """
-            return self.app_initializer.getGabineteController(self.sede).get_gabinete_by_id(id)
+            controller = self.app_initializer.getGabineteController(self.sede)
+            return controller.get_gabinete_by_id(id)
 
         @self.app.route(f'{base_path}', methods=['POST'], endpoint=f'create_gabinete_{self.sede}')
         def create_gabinete():
@@ -77,7 +79,9 @@ class Gabinete:
               400:
                 description: Error de validación o campos faltantes.
             """
-            return self.app_initializer.getGabineteController(self.sede).create_gabinete(request.json)
+            controller = self.app_initializer.getGabineteController(self.sede)
+            json_data = request.get_json()
+            return controller.create_gabinete(self.sede,json_data)
 
         @self.app.route(f'{base_path}/<int:id>', methods=['PUT'], endpoint=f'update_gabinete_{self.sede}')
         def update_gabinete(id):
@@ -114,4 +118,6 @@ class Gabinete:
               404:
                 description: Gabinete no encontrado.
             """
-            return self.app_initializer.getGabineteController(self.sede).update_gabinete(id, request.json)
+            controller = self.app_initializer.getGabineteController(self.sede)
+            json_data = request.get_json()
+            return controller.update_gabinete(id, json_data)

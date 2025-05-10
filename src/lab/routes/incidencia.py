@@ -23,7 +23,7 @@ class Incidencia:
               404:
                 description: No se encontraron incidencias.
             """
-            return self.app_initializer.getIncidenciaController(self.sede).get_incidencias()
+            return self.app_initializer.getIncidenciaController(self.sede).get_incidencias(self.sede)
 
         @self.app.route(f'{base_path}/<int:id>', methods=['GET'], endpoint=f'get_incidencia_by_id_{self.sede}')
         def get_incidencia_by_id(id):
@@ -75,7 +75,7 @@ class Incidencia:
               400:
                 description: Error de validación o datos faltantes.
             """
-            return self.app_initializer.getIncidenciaController(self.sede).create_incidencia(request.json)
+            return self.app_initializer.getIncidenciaController(self.sede).create_incidencia(self.sede,request.json)
 
         @self.app.route(f'{base_path}/<int:id>', methods=['PUT'], endpoint=f'update_incidencia_{self.sede}')
         def update_incidencia(id):
@@ -106,4 +106,4 @@ class Incidencia:
               404:
                 description: Incidencia no encontrada.
             """
-            return self.app_initializer.getIncidenciaController(self.sede).update_incidencia(id, request.json)
+            return self.app_initializer.getIncidenciaController(self.sede).update_incidencia(self.sede,id, request.json)

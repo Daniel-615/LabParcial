@@ -91,7 +91,7 @@ class Audiencia:
               404:
                 description: Asunto o abogado no encontrado
             """
-            return self.app_initializer.getAudienciaController(self.sede).create_audiencia(request.json)
+            return self.app_initializer.getAudienciaController(self.sede).create_audiencia(request.json,self.sede)
 
         @self.app.route(f'{base_path}/<int:id>', methods=['PUT'], endpoint=f'update_audiencia_{self.sede}')
         def update_audiencia(id):
@@ -128,4 +128,4 @@ class Audiencia:
               404:
                 description: Audiencia o abogado no encontrado
             """
-            return self.app_initializer.getAudienciaController(self.sede).update_audiencia(id, request.json)
+            return self.app_initializer.getAudienciaController(self.sede).update_audiencia(id, request.json,self.sede)
